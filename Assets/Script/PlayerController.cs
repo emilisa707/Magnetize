@@ -10,7 +10,9 @@ public class PlayerController : MonoBehaviour
     public float rotateSpeed = 360f;
 
     private GameObject closestTower;
-    private GameObject hookedTower;
+    private GameObject hookedTowerToLeft;
+    private GameObject hookedTowerToRight;
+
     private bool isPulled = false;
 
     private UIControllerScript uiControl;
@@ -37,21 +39,39 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && !isPulled)
         {
-            if (closestTower != null && hookedTower == null)
+            /*if (closestTower != null && hookedTowerToRight == null)
             {
-                hookedTower = closestTower;
+                
             }
 
-            if (hookedTower)
+            if (closestTower != null && hookedTowerToLeft == null)
             {
-                float distance = Vector2.Distance(transform.position, hookedTower.transform.position);
+                
+            }*/
 
-                Vector3 pullDirection = (hookedTower.transform.position - transform.position).normalized;
+            if (hookedTowerToRight)
+            {
+                float distance = Vector2.Distance(transform.position, hookedTowerToRight.transform.position);
+
+                Vector3 pullDirection = (hookedTowerToRight.transform.position - transform.position).normalized;
 
                 float newPullForce = Mathf.Clamp(pullForce / distance, 20, 50);
                 rb2D.AddForce(pullDirection * newPullForce);
 
                 rb2D.angularVelocity = -rotateSpeed / distance;
+                isPulled = true;
+            }
+            
+            if (hookedTowerToLeft)
+            {
+                float distance = Vector2.Distance(transform.position, hookedTowerToLeft.transform.position);
+
+                Vector3 pullDirection = (hookedTowerToLeft.transform.position - transform.position).normalized;
+
+                float newPullForce = Mathf.Clamp(pullForce / distance, 20, 50);
+                rb2D.AddForce(pullDirection * newPullForce);
+
+                rb2D.angularVelocity = rotateSpeed / distance;
                 isPulled = true;
             }
         }
@@ -104,11 +124,19 @@ public class PlayerController : MonoBehaviour
     
     public void OnTriggerStay2D(Collider2D collision)
     {
-        if(collision.gameObject.tag == "Tower")
+        if(collision.gameObject.tag == "TowerToLeft")
         {
             closestTower = collision.gameObject;
-
             collision.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+            hookedTowerToLeft = closestTower;
+            hookedTowerToRight = null;
+        }
+        else if(collision.gameObject.tag == "TowerToRight")
+        {
+            closestTower = collision.gameObject;
+            collision.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+            hookedTowerToRight = closestTower;
+            hookedTowerToLeft = null;
         }
     }
     
@@ -116,7 +144,7 @@ public class PlayerController : MonoBehaviour
     {
         if (isPulled) return;
 
-        if(collision.gameObject.tag == "Tower")
+        if(collision.gameObject.tag == "TowerToRight" || collision.gameObject.tag == "TowerToRight")
         {
             closestTower = null;
 
